@@ -6,5 +6,6 @@ import org.asynchttpclient.Response
 
 object Json extends (Response => JValue) {
   def apply(r: Response) =
-    (dispatch.as.String andThen (s => parse(StringInput(s), true)))(r)
+//    (dispatch.as.String andThen (s => parse(StringInput(s), true)))(r)
+    (dispatch.as.String andThen (s => parse(s, true)))(r)
 }

@@ -66,11 +66,11 @@ object Req {
   final case class Properties(bodyType: BodyType = NoBody, methodExplicitlySet: Boolean = false)
 
   trait BodyType
-  final case object NoBody extends BodyType
-  final case object StringBody extends BodyType
-  final case object ByteArrayBody extends BodyType
-  final case object EntityWriterBody extends BodyType
-  final case object FileBody extends BodyType
+  case object NoBody extends BodyType
+  case object StringBody extends BodyType
+  case object ByteArrayBody extends BodyType
+  case object EntityWriterBody extends BodyType
+  case object FileBody extends BodyType
 }
 
 trait HostVerbs {
@@ -335,7 +335,7 @@ trait RequestBuilderVerbs extends RequestVerbs {
    * Set query parameters, overwriting any pre-existing query parameters.
    *
    * If an empty Seq is provided for a key, we will treat that as intending
-   * for the key to be speified without _any_ values.
+   * for the key to be specified without _any_ values.
    */
   def setQueryParameters(params: Map[String, Seq[String]]) = {
     subject.underlying { ahcReqBuilder =>

@@ -1,6 +1,7 @@
 package dispatch.oauth
 
 import dispatch._
+import dispatch.oauth.SigningVerbs
 import io.netty.handler.codec.http.HttpHeaderNames
 import org.asynchttpclient._
 import org.asynchttpclient.oauth._

@@ -6,43 +6,57 @@ object Common {
   val defaultScalaVersion = "2.13.1"
 
   val testSettings:Seq[Setting[_]] = Seq(
-    testOptions in Test += Tests.Cleanup { loader =>
+    Test / testOptions += Tests.Cleanup { loader =>
       val c = loader.loadClass("unfiltered.spec.Cleanup$")
       c.getMethod("cleanup").invoke(c.getField("MODULE$").get(c))
     },
-    testOptions in Test += Tests.Argument(TestFrameworks.ScalaCheck, "-verbosity", "3")
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-verbosity", "3")
   )
 
   val settings: Seq[Setting[_]] = Seq(
     version := "1.3.0-SNAPSHOT",
 
-    crossScalaVersions := Seq("2.12.10", "2.13.1"),
+    crossScalaVersions := Seq("2.12.16", "2.13.8", "3.1.3"),
 
     scalaVersion := defaultScalaVersion,
 
-    scalacOptions in (Compile) ++= Seq(
+    // common scalac options
+    Compile / scalacOptions ++= Seq(
       "-deprecation",
       "-feature",
       "-unchecked",
       "-language:higherKinds",
-      "-language:implicitConversions",
-      // "-Xfatal-warnings",
-      "-Xlint",
-      "-Ywarn-dead-code",
-      "-Ywarn-numeric-widen",
-      "-Ywarn-value-discard"
+      "-language:implicitConversions"
     ),
 
-    scalacOptions in (Compile) ++= {
+    // scala version-specifc scalac options
+    scalacOptions ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, v)) if v <= 12 =>
-          Seq("-Yno-adapted-args", "-Xfuture")
-        case _ =>
-          Nil
+        case Some((2, 12)) =>
+          Seq(
+            "-Xlint",
+            "-Ywarn-dead-code",
+            "-Ywarn-numeric-widen",
+            "-Ywarn-value-discard"
+          )
+        case Some((2, 13)) =>
+          Seq(
+            "-Xlint",
+            "-Ywarn-dead-code",
+            "-Ywarn-numeric-widen",
+            "-Ywarn-value-discard",
+            "-Ytasty-reader"
+          )
+        case Some((3, _)) =>
+          Seq(
+            "-source",
+            "3.0-migration",
+          )
+        case _ => Nil
       }
     },
 
-    scalacOptions in (Test) ~= { (opts: Seq[String]) =>
+    Test / scalacOptions ~= { (opts: Seq[String]) =>
       opts.diff(
         Seq(
           "-Xlint"
@@ -65,7 +79,7 @@ object Common {
         Some("releases"  at nexus + "service/local/staging/deploy/maven2")
     },
 
-    publishArtifact in Test := false,
+    Test / publishArtifact := false,
 
     licenses := Seq("LGPL v3" -> url("http://www.gnu.org/licenses/lgpl.txt")),
 

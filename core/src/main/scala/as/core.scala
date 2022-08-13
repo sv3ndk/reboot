@@ -29,7 +29,7 @@ object Bytes extends (asynchttpclient.Response => Array[Byte]) {
   def apply(r: asynchttpclient.Response) = r.getResponseBodyAsBytes
 }
 
-object File extends {
+object File {
   def apply(file: java.io.File) = {
     val fileHandler = new RandomAccessFile(file, "rw")
 
