@@ -3,7 +3,7 @@ import sbt._
 object Common {
   import Keys._
 
-  val defaultScalaVersion = "2.13.1"
+  val scala3Version = "3.1.3"
 
   val testSettings:Seq[Setting[_]] = Seq(
     Test / testOptions += Tests.Cleanup { loader =>
@@ -16,9 +16,9 @@ object Common {
   val settings: Seq[Setting[_]] = Seq(
     version := "1.3.0-SNAPSHOT",
 
-    crossScalaVersions := Seq("2.12.16", "2.13.8", "3.1.3"),
+    crossScalaVersions := Seq("2.12.16", "2.13.8", scala3Version),
 
-    scalaVersion := defaultScalaVersion,
+    scalaVersion := scala3Version,
 
     // common scalac options
     Compile / scalacOptions ++= Seq(
