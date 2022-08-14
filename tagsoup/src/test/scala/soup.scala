@@ -16,6 +16,7 @@ with DispatchCleanup {
     netty.Server.local(port).handler(netty.cycle.Planify {
       case Path("/echo") & Params(Echo(echo)) =>
         Html(<html><head></head><body><div id="echo">{echo}</div></body></html>)
+          .asInstanceOf[ResponseFunction[io.netty.handler.codec.http.HttpResponse]]
     }).start()
   }
 
