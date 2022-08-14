@@ -39,35 +39,36 @@ with DispatchCleanup {
 
   class RetryCounter {
     private val retried = new java.util.concurrent.atomic.AtomicInteger
-    def succeedOn(successRetry: Int)() = {
-      Http.default(localhost << Map("echo" -> retried.getAndIncrement.toString)
-           OK as.String).either.map { eth =>
-        eth.right.flatMap { numstr =>
-          val num = numstr.toInt
-          if (num == successRetry)
-            Right(num)
-          else
-            Left(num)
-        }
+    def succeedOn(successRetry: Int): () => Future[Either[Any, Int]] =
+      () => {
+        Http.default(localhost << Map("echo" -> retried.getAndIncrement.toString)
+          OK as.String).either.map { eth =>
+            eth.right.flatMap { numstr =>
+              val num = numstr.toInt
+              if (num == successRetry)
+                Right(num)
+              else
+                Left(num)
+            }
+          }
       }
-    }
   }
 
   property("succeed on the first request") = forAll(smallNums) { maxRetries =>
     val rc = new RetryCounter
-    val p = retry.Backoff(maxRetries)(() => rc.succeedOn(0))
+    val p = retry.Backoff(maxRetries)(rc.succeedOn(0))
     p() ?= Right(0)
   }
 
   property("succeed on the max retry") = forAll(smallNums) { maxRetries =>
     val rc = new RetryCounter
-    val p = retry.Directly(maxRetries)(() => rc.succeedOn(maxRetries))
+    val p = retry.Directly(maxRetries)(rc.succeedOn(maxRetries))
     p() ?= Right(maxRetries)
   }
 
   property("fail after max retries") = forAll(smallNums) { maxRetries =>
     val rc = new RetryCounter
-    val p = retry.Directly(maxRetries)(() => rc.succeedOn(maxRetries + 1))
+    val p = retry.Directly(maxRetries)(rc.succeedOn(maxRetries + 1))
     p() ?= Left(maxRetries)
   }
 
@@ -76,7 +77,7 @@ with DispatchCleanup {
     val p = retry.Backoff(
       max,
       Duration(2, TimeUnit.MICROSECONDS)
-    )(() => rc.succeedOn(max))
+    )(rc.succeedOn(max))
     p() ?= Right(max)
   }
 
@@ -85,7 +86,7 @@ with DispatchCleanup {
     val p = retry.Pause(
       max,
       Duration(500, TimeUnit.MICROSECONDS)
-    )(() => rc.succeedOn(max + 1))
+    )(rc.succeedOn(max + 1))
     p() ?= Left(max)
   }
 }

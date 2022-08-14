@@ -15,17 +15,16 @@ with DispatchCleanup {
     import unfiltered.response._
     def jsonToString(json: JValue) = compact(render(json))
 
-    def apply(json: JValue) =
+    def apply(json: JValue): ComposeResponse[io.netty.handler.codec.http.HttpResponse] =
       new ComposeResponse(JsonContent ~> ResponseString(jsonToString(json)))
 
-    def apply(json: JValue, cb: String) =
+    def apply(json: JValue, cb: String): ComposeResponse[io.netty.handler.codec.http.HttpResponse] =
       new ComposeResponse(JsContent ~> ResponseString("%s(%s)" format(cb, jsonToString(json))))
   }
 
   private val port = unfiltered.util.Port.any
   val server = {
     import unfiltered.netty
-    import unfiltered.response._
     import unfiltered.request._
 
     object In extends Params.Extract("in", Params.first)
